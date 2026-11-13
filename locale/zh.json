@@ -1,0 +1,10 @@
+{
+  "meta": {
+    "title": "提示词深化助手 (dsh-better)",
+    "description": "通过只读 Fork 助手深度分析仓库与上下文来完善提示词（/better），并在派发前校验带 /better 标记的 Subagent 任务简报。",
+    "detail": "docs/DETAIL.zh.md"
+  },
+  "rpcUnavailable": "无法连接宿主 /api/dsh-better 通道（请重启 DeepSeek Harness 以加载新版插件）",
+  "settingsTitle": "提示词深化",
+  "settingsButton": "设置"
+}

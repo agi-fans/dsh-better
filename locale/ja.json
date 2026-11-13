@@ -1,0 +1,10 @@
+{
+  "meta": {
+    "title": "プロンプト深化ヘルパー (dsh-better)",
+    "description": "読み取り専用フォークヘルパーでリポジトリと文脈を分析してプロンプトを深化（/better）し、ディスパッチ前に /better 付きサブエージェント指示書を検証します。",
+    "detail": "docs/DETAIL.ja.md"
+  },
+  "rpcUnavailable": "ホストの /api/dsh-better に接続できません（DeepSeek Harness を再起動してください）",
+  "settingsTitle": "プロンプト深化",
+  "settingsButton": "設定"
+}

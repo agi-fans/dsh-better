@@ -1,0 +1,10 @@
+{
+  "meta": {
+    "title": "Optimizador de prompts (dsh-better)",
+    "description": "Profundiza borradores de prompts mediante un inspector bifurcado de solo lectura (/better) y verifica instrucciones de subagentes marcadas con /better antes de enviarlas.",
+    "detail": "docs/DETAIL.es.md"
+  },
+  "rpcUnavailable": "No se puede conectar con /api/dsh-better en el host (reinicia DeepSeek Harness para recargar el plugin)",
+  "settingsTitle": "Profundizar prompt",
+  "settingsButton": "Ajustes"
+}

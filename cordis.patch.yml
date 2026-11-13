@@ -1,0 +1,9 @@
+- insert:
+    - id: dsh-better
+      name: '@agi-fans/dsh-better'
+      config:
+        model: null
+        reasoningEffort: null
+        briefModel: null
+        briefReasoningEffort: null
+        checkSubagents: true

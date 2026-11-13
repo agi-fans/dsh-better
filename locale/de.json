@@ -1,0 +1,10 @@
+{
+  "meta": {
+    "title": "Prompt-Vertiefer (dsh-better)",
+    "description": "Vertieft Prompt-Entwürfe über einen schreibgeschützten Fork-Inspektor (/better) und prüft mit /better markierte Subagent-Briefings vor dem Start.",
+    "detail": "docs/DETAIL.de.md"
+  },
+  "rpcUnavailable": "/api/dsh-better auf dem Host nicht erreichbar (DeepSeek Harness neu starten, um das Plugin zu laden)",
+  "settingsTitle": "Prompt-Vertiefung",
+  "settingsButton": "Einstellungen"
+}

@@ -1,0 +1,10 @@
+{
+  "meta": {
+    "title": "Approfondissement de prompt (dsh-better)",
+    "description": "Approfondit les brouillons de prompts via un assistant bifurqué en lecture seule (/better) et vérifie les briefs de sous-agents marqués /better avant l’envoi.",
+    "detail": "docs/DETAIL.fr.md"
+  },
+  "rpcUnavailable": "Impossible de joindre /api/dsh-better sur l’hôte (redémarrez DeepSeek Harness pour recharger le plugin)",
+  "settingsTitle": "Approfondir le prompt",
+  "settingsButton": "Paramètres"
+}

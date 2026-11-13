@@ -1,0 +1,10 @@
+{
+  "meta": {
+    "title": "Углубление промптов (dsh-better)",
+    "description": "Углубляет черновики промптов через изолированного помощника только для чтения (/better) и проверяет задания субагентов с префиксом /better перед запуском.",
+    "detail": "docs/DETAIL.ru.md"
+  },
+  "rpcUnavailable": "Не удалось подключиться к /api/dsh-better на хосте (перезапустите DeepSeek Harness)",
+  "settingsTitle": "Углубление промпта",
+  "settingsButton": "Настройки"
+}

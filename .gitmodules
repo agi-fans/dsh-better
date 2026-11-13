@@ -1,0 +1,6 @@
+[submodule "refs/pi-better"]
+	path = refs/pi-better
+	url = https://github.com/nicobailon/pi-better.git
+[submodule "refs/deepseek-harness"]
+	path = refs/deepseek-harness
+	url = https://github.com/deepseek-ai/deepseek-harness.git

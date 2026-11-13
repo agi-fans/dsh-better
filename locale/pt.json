@@ -1,0 +1,10 @@
+{
+  "meta": {
+    "title": "Aprofundador de prompts (dsh-better)",
+    "description": "Aprofunda rascunhos de prompts por meio de um inspetor bifurcado somente leitura (/better) e verifica briefs de subagentes marcados com /better antes do envio.",
+    "detail": "docs/DETAIL.pt.md"
+  },
+  "rpcUnavailable": "Não foi possível alcançar /api/dsh-better no host (reinicie o DeepSeek Harness para recarregar o plugin)",
+  "settingsTitle": "Aprofundar prompt",
+  "settingsButton": "Configurações"
+}

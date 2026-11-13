@@ -1,0 +1,10 @@
+{
+  "meta": {
+    "title": "Prompt Deepener (dsh-better)",
+    "description": "Deepens prompt drafts via a forked read-only inspector (/better) and checks /better-marked subagent briefs before dispatch.",
+    "detail": "docs/DETAIL.md"
+  },
+  "rpcUnavailable": "Cannot reach /api/dsh-better on Host (restart DeepSeek Harness to reload plugin)",
+  "settingsTitle": "Prompt Deepener",
+  "settingsButton": "Settings"
+}
