@@ -6,10 +6,11 @@ A [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (`dsh`) pl
 
 ## Demo
 
-<!-- GitHub plays a video inline only when it is uploaded as an attachment. Drop `docs/motion.mp4`
+[<!-- GitHub plays a video inline only when it is uploaded as an attachment. Drop `docs/motion.mp4`
      into this README in GitHub's editor and put the generated https://github.com/user-attachments/...
      URL on the line below, the way pi-better's README does. -->
-https://github.com/agi-fans/dsh-better/blob/main/docs/motion.mp4
+https://github.com/agi-fans/dsh-better/blob/main/docs/motion.mp4](https://github.com/user-attachments/assets/b75f9b42-cff9-4661-be83-5f57c1d881a7
+)
 
 A 20-second one-shot explainer (Chinese UI, sound on). The draft lifts out of the composer and becomes the first finished turn; a hairline forks into a read-only helper that reuses the cached prompt prefix; that same panel widens into the Depth dock while the four stages run; then it folds back into the composer as the grounded prompt — real files, acceptance criteria, one-click **Restore original**.
 
