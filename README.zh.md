@@ -6,9 +6,7 @@
 
 ## 效果演示
 
-<!-- GitHub 只有在把视频作为附件上传时才内嵌播放。把 `docs/motion.mp4` 拖进 GitHub 的 README 编辑器，
-     它会生成 https://github.com/user-attachments/... 链接，替换下面这行即可（和 pi-better 的 README 一样）。 -->
-https://github.com/agi-fans/dsh-better/blob/main/docs/motion.mp4
+[https://github.com/agi-fans/dsh-better/blob/main/docs/motion.mp4](https://github.com/user-attachments/assets/b75f9b42-cff9-4661-be83-5f57c1d881a7)
 
 20 秒一镜到底，带配乐，中文界面。草稿从输入框里抽出去变成第一块已完成轮次；细线分叉出只读助手，复用同一份 KV 缓存；同一块面板展开成 Depth 面板跑完四阶段；最后收成胶囊，把带真实文件与验收条件的提示词回填进输入框，可一键 **还原原稿**。
 
