@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-11-14
+
+### Added
+
+- **20-second explainer animation**: A one-shot motion piece (`docs/motion.mp4`, `designs/dsh-better-principle/`) that walks through the whole flow — draft, read-only fork, the four Depth stages, the grounded prompt landing back in the composer.
+
 ### Changed
 
 - **Restore original now takes the timer's place in the tool row**: when a run completes, the `conversation.input.left` pill that showed `Stage · 0:31` turns into the **Restore original** control in place, instead of a button on the banner above the composer. The banner keeps the "deepened prompt is in your draft" message and its dismiss control; the restore target expires after two minutes or as soon as a new run starts, and restoring reports back through the banner.
@@ -27,5 +33,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **KV prompt cache preservation**: Rely on `tools.guard()` + `sandbox/mode: 'read-only'` + `approval/policy: 'never'` without `tools.restrict({ deny })`, keeping `tools.schemas()` byte-identical to the parent session so DeepSeek's `addition-only` tool baseline never rebuilds.
 - **PTC `run_code` support & metadata caching**: Added read-only `run_code` batching (with live `tool/ptc-dispatch-start` / `tool/ptc-dispatch` badge tracking), concurrent `workingDirectory.ensure` + `llm.resolveModelInfo` startup, a 5-minute `resolveModelInfo` TTL cache, tighter `0–2` tool-batch / zero-preamble instructions in `prompts/helper.md` and `prompts/brief.md`, and 160ms active UI polling.
 
-[Unreleased]: https://github.com/agi-fans/dsh-better/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/agi-fans/dsh-better/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/agi-fans/dsh-better/releases/tag/v0.1.1
 [0.1.0]: https://github.com/agi-fans/dsh-better/releases/tag/v0.1.0

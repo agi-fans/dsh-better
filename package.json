@@ -1,6 +1,6 @@
 {
   "name": "@agi-fans/dsh-better",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Deepen prompts before sending and check subagent briefs in DeepSeek Harness (adapted from pi-better).",
   "type": "module",
   "license": "MIT",
