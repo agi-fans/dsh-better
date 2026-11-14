@@ -6,11 +6,12 @@ A [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (`dsh`) pl
 
 ## Demo
 
-![dsh-better /better live demo](docs/demo.gif)
+<!-- GitHub plays a video inline only when it is uploaded as an attachment. Drop `docs/motion.mp4`
+     into this README in GitHub's editor and put the generated https://github.com/user-attachments/...
+     URL on the line below, the way pi-better's README does. -->
+https://github.com/agi-fans/dsh-better/blob/main/docs/motion.mp4
 
-1. **Draft with `/better`**: Send `/better 还有哪些功能可以优化？` (*"What else can be improved?"*). The composer unlocks immediately while a forked read-only helper starts in the background.
-2. **Grounded repo inspection**: Above the input box, the Depth dock tracks `Explore → Surface → Deepen → Sharpen` with live read-only tool badges (`glob`, `grep`, `read`) and streaming synthesis — reusing the session's KV prompt cache without touching your chat history.
-3. **Review before sending**: The deepened prompt — anchored to real files, symbols (`src/host/index.ts`, `src/client/locales.ts`, `tests/host-plugin.test.ts`), and acceptance criteria — lands directly in the composer with one-click **Restore original**. Nothing is sent until you press `Enter`.
+A 20-second one-shot explainer (Chinese UI, sound on). The draft lifts out of the composer and becomes the first finished turn; a hairline forks into a read-only helper that reuses the cached prompt prefix; that same panel widens into the Depth dock while the four stages run; then it folds back into the composer as the grounded prompt — real files, acceptance criteria, one-click **Restore original**.
 
 ## Features
 

@@ -6,11 +6,11 @@
 
 ## 效果演示
 
-![dsh-better /better 实时深化演示](docs/demo.gif)
+<!-- GitHub 只有在把视频作为附件上传时才内嵌播放。把 `docs/motion.mp4` 拖进 GitHub 的 README 编辑器，
+     它会生成 https://github.com/user-attachments/... 链接，替换下面这行即可（和 pi-better 的 README 一样）。 -->
+https://github.com/agi-fans/dsh-better/blob/main/docs/motion.mp4
 
-1. **输入草稿**：在输入框中发送 `/better 还有哪些功能可以优化？`，输入框立刻解锁，后台同步启动只读分析助手。
-2. **后台只读检索与四阶段深化**：上方 Depth 面板实时展示 `探索 → 浮现 → 深化 → 打磨` 四阶段与只读工具徽章（`glob`、`grep`、`read` 等），复用当前会话 KV Prompt Cache 且不污染主对话历史。
-3. **回填输入框审阅或一键还原**：结合真实文件路径与符号（如 `src/host/index.ts`、`src/client/locales.ts`、`tests/host-plugin.test.ts`）深化后的提示词直接填入输入框，支持一键 **还原原稿**，确认无误后再按 `Enter` 发送。
+20 秒一镜到底，带配乐，中文界面。草稿从输入框里抽出去变成第一块已完成轮次；细线分叉出只读助手，复用同一份 KV 缓存；同一块面板展开成 Depth 面板跑完四阶段；最后收成胶囊，把带真实文件与验收条件的提示词回填进输入框，可一键 **还原原稿**。
 
 ## 功能特性
 

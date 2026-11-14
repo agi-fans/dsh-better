@@ -2,3 +2,6 @@ node_modules/
 .DS_Store
 *.tsbuildinfo
 *.mp4
+
+# the 20-second explainer is a real asset, unlike the scratch recordings
+!docs/motion.mp4
