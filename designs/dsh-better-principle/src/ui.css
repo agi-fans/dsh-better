@@ -1,0 +1,51 @@
+/* The harness window, lifted: real CSS px inside a 1440x900 pane. 1 px here is 1.5 px of the stage. */
+.ui { position:absolute; left:-120px; top:-200px; width:1440px; height:900px; transform:scale(1.5); transform-origin:0 0; color:var(--ink) }
+.ui * { box-sizing:border-box }
+.hdr { position:absolute; left:170px; top:556px; display:flex; align-items:center; gap:18px; font-size:13px; color:var(--ink2) }
+.hdr span { display:inline-flex; align-items:center; gap:6px }
+.chev { width:9px; height:9px; border-right:1.4px solid currentColor; border-bottom:1.4px solid currentColor; transform:rotate(45deg) translateY(-2px); opacity:.7 }
+.folder { width:15px; height:12px; border:1.4px solid currentColor; border-radius:2px; position:relative; opacity:.8 }
+.folder:before { content:""; position:absolute; left:0; top:-4px; width:6px; height:4px; border:1.4px solid currentColor; border-bottom:0; border-radius:2px 2px 0 0 }
+.dial { width:13px; height:13px; border:1.4px solid currentColor; border-radius:50%; opacity:.8 }
+.composer { position:absolute; left:170px; top:600px; width:1100px; border-radius:26px; background:var(--panel); border:1px solid var(--line); box-shadow:0 34px 70px rgba(0,0,0,.42), inset 0 1px 0 color-mix(in srgb, var(--second) 6%, transparent); padding:20px 22px 12px }
+.comp-body { min-height:62px; font-size:18px; line-height:1.55; letter-spacing:.01em }
+.comp-ph { color:var(--ink3) }
+.comp-line { white-space:pre-wrap }
+.caret { display:inline-block; width:2px; height:19px; margin-left:2px; vertical-align:-4px; background:var(--main) }
+.comp-bar { display:flex; align-items:center; gap:12px; height:46px }
+.plus { width:32px; height:32px; border-radius:50%; display:grid; place-items:center; background:color-mix(in srgb, var(--second) 8%, transparent); color:var(--ink2); font-size:19px; line-height:1 }
+.mode { display:inline-flex; align-items:center; gap:7px; font-size:13px; color:var(--ink2) }
+.ws { width:13px; height:10px; border:1.3px solid currentColor; border-radius:2px; opacity:.85 }
+.model { margin-left:auto; font-size:13px; color:var(--ink2) }
+.send { width:44px; height:44px; border-radius:50%; display:grid; place-items:center; background:var(--main); color:var(--ground) }
+.pill { display:inline-flex; align-items:center; gap:6px; font-size:12px; padding:3px 10px; border-radius:999px; border:1px solid var(--line2); color:var(--ink2); white-space:nowrap }
+.pill-run { border-color:color-mix(in srgb, var(--main) 46%, transparent); color:var(--ink); background:color-mix(in srgb, var(--main) 9%, transparent) }
+.pill-dot { width:6px; height:6px; border-radius:999px; background:var(--main) }
+.dock { position:absolute; left:170px; bottom:312px; width:1100px; padding:9px 12px; display:flex; flex-direction:column; gap:7px; border-radius:12px; border:1px solid color-mix(in srgb, var(--main) 50%, transparent); background:color-mix(in srgb, var(--main) 7%, transparent); font-size:12px }
+.dock-row { display:flex; align-items:center; justify-content:space-between; gap:8px }
+.dock-l, .dock-r { display:flex; align-items:center; gap:8px }
+.badge { display:inline-flex; align-items:center; gap:5px; font-family:ui-monospace, Menlo, monospace; font-weight:600; font-size:11px; padding:2px 7px; border-radius:6px; background:color-mix(in srgb, var(--main) 44%, var(--ground)); color:var(--second) }
+.spin { width:11px; height:11px; border-radius:50%; border:2px solid color-mix(in srgb, var(--second) 26%, transparent); border-top-color:var(--second); display:block }
+.meter { display:inline-flex; align-items:center; gap:3px }
+.cell { width:8px; height:8px; border-radius:2px; background:color-mix(in srgb, var(--second) 15%, transparent) }
+.cell.on { background:var(--main) }
+.cell.done { background:var(--accent) }
+.stages { display:inline-flex; align-items:center; gap:4px }
+.stage { font-size:11px; padding:1px 7px; border-radius:999px; color:var(--ink2); opacity:.62 }
+.stage.on { color:var(--ink); font-weight:600; background:color-mix(in srgb, var(--second) 15%, transparent); opacity:1 }
+.stage.past { opacity:1 }
+.mchip { font-family:ui-monospace, Menlo, monospace; font-size:11px; padding:1px 7px; border-radius:999px; border:1px solid var(--line2); color:var(--ink2); white-space:nowrap }
+.clock { font-family:ui-monospace, Menlo, monospace; font-size:11px; color:var(--ink2) }
+.esc { font-size:11px; padding:2px 8px; border-radius:6px; border:1px solid var(--line2); color:var(--ink) }
+.dock-draft { font-size:11px; color:var(--ink2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+.dock-tools { display:flex; align-items:center; gap:6px; flex-wrap:wrap; min-height:20px; color:var(--ink2); font-size:11px }
+.tool { display:inline-flex; align-items:center; gap:5px; padding:1px 7px; border-radius:999px; border:1px solid color-mix(in srgb, var(--second) 13%, transparent); background:color-mix(in srgb, var(--second) 6%, transparent); font-family:ui-monospace, Menlo, monospace; font-size:11px; white-space:nowrap }
+.tool i { width:6px; height:6px; border-radius:999px; background:var(--main) }
+.tool.done i { background:var(--accent) }
+.tool.off { text-decoration:line-through; opacity:.45; border-style:dashed }
+.gen { margin-left:auto; font-family:ui-monospace, Menlo, monospace; font-size:11px; color:var(--ink) }
+.preview { min-height:28px; padding:6px 9px; border-radius:8px; background:color-mix(in srgb, var(--second) 7%, transparent); color:var(--ink2); font-size:11px; line-height:1.55; overflow-wrap:anywhere }
+.toast { position:absolute; left:170px; top:566px; width:1100px; display:flex; align-items:center; gap:9px; font-size:13px; color:var(--ink2) }
+.toast i { width:7px; height:7px; border-radius:999px; background:var(--accent); flex:none }
+.chips { display:flex; align-items:center; gap:8px; margin-top:10px }
+.fchip { font-family:ui-monospace, Menlo, monospace; font-size:12px; padding:2px 9px; border-radius:6px; border:1px solid var(--line2); color:var(--ink2); background:color-mix(in srgb, var(--second) 5%, transparent) }
