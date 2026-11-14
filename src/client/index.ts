@@ -151,6 +151,53 @@ if (typeof window !== 'undefined' && window.__ModuleLoader__) {
           const trackers = new Map<string, TrackerEntry>()
           let disposed = false
 
+          // The "Restore original" control takes the place of the running timer in the composer
+          // tool row, so its target is kept here rather than in the dock's own state.
+          interface PendingRestore {
+            readonly text: string
+            readonly timer: ReturnType<typeof setTimeout>
+          }
+          const pendingRestores = new Map<string, PendingRestore>()
+          const restoreListeners = new Set<() => void>()
+          const noticeSinks = new Map<string, (notice: { readonly kind: 'success' | 'info'; readonly text: string }) => void>()
+
+          function notifyRestore(): void {
+            for (const listener of restoreListeners) {
+              try {
+                listener()
+              } catch {
+                // Keep sibling subscribers alive
+              }
+            }
+          }
+
+          function clearPendingRestore(sessionId: string): void {
+            const pending = pendingRestores.get(sessionId)
+            if (!pending) return
+            clearTimeout(pending.timer)
+            pendingRestores.delete(sessionId)
+            notifyRestore()
+          }
+
+          function setPendingRestore(sessionId: string, text: string): void {
+            clearPendingRestore(sessionId)
+            const timer = setTimeout(() => { clearPendingRestore(sessionId) }, 120_000)
+            pendingRestores.set(sessionId, { text, timer })
+            notifyRestore()
+          }
+
+          function usePendingRestore(sessionId: string | undefined): string | undefined {
+            const [, setVersion] = useState(0)
+            useEffect(() => {
+              if (!sessionId) return undefined
+              const listener = (): void => setVersion((v: number) => v + 1)
+              restoreListeners.add(listener)
+              return () => { restoreListeners.delete(listener) }
+            }, [sessionId])
+            if (!sessionId) return undefined
+            return pendingRestores.get(sessionId)?.text
+          }
+
           const getOrCreateEntry = (sessionId: string): TrackerEntry => {
             let entry = trackers.get(sessionId)
             if (!entry) {
@@ -334,6 +381,7 @@ if (typeof window !== 'undefined' && window.__ModuleLoader__) {
               if (!execSessionId) return
               if (name === 'better' && result?.kind === 'success') {
                 const entry = getOrCreateEntry(execSessionId)
+                clearPendingRestore(execSessionId)
                 const now = Date.now()
                 const capturedDraft = entry.lastSubmittedDraft
                 entry.lastSubmittedDraft = ''
@@ -409,7 +457,6 @@ if (typeof window !== 'undefined' && window.__ModuleLoader__) {
             const [notice, setNotice] = useState(null as {
               readonly kind: 'success' | 'info'
               readonly text: string
-              readonly restoreText?: string
             } | null)
 
             const handledRunIdRef = useRef(null as string | null)
@@ -448,13 +495,21 @@ if (typeof window !== 'undefined' && window.__ModuleLoader__) {
               return () => clearInterval(timer)
             }, [snapshot?.status, snapshot?.runId])
 
-            // Auto-dismiss transient success/cancelled notice (longer when restore is offered).
+            // The restore control lives in the tool row; it reports back through here.
+            useEffect(() => {
+              if (!sessionId) return undefined
+              noticeSinks.set(sessionId, setNotice)
+              return () => {
+                if (noticeSinks.get(sessionId) === setNotice) noticeSinks.delete(sessionId)
+              }
+            }, [sessionId])
+
+            // Auto-dismiss transient success/cancelled notice.
             useEffect(() => {
               if (!notice) return undefined
-              const timeoutMs = notice.restoreText ? 8000 : 4000
               const timer = setTimeout(() => {
                 setNotice(null)
-              }, timeoutMs)
+              }, 4000)
               return () => clearTimeout(timer)
             }, [notice])
 
@@ -470,10 +525,10 @@ if (typeof window !== 'undefined' && window.__ModuleLoader__) {
                 const merged = insertIntoDraft(snapshot.improvedPrompt, existingDraft)
                 inputActions?.setDraft?.(merged)
                 inputActions?.persistDraft?.()
-                const restoreText = snapshot.sourceDraft
-                  ? insertIntoDraft(snapshot.sourceDraft, existingDraft)
-                  : undefined
-                setNotice({ kind: 'success', text: copy.done, restoreText })
+                if (snapshot.sourceDraft) {
+                  setPendingRestore(sessionId, insertIntoDraft(snapshot.sourceDraft, existingDraft))
+                }
+                setNotice({ kind: 'success', text: copy.done })
                 void ackRun(sessionId, snapshot.runId)
                 return
               }
@@ -587,25 +642,6 @@ if (typeof window !== 'undefined' && window.__ModuleLoader__) {
                     h('span', null, notice.text),
                   ),
                   h('div', { style: { display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 } },
-                    notice.restoreText
-                      ? h('button', {
-                          type: 'button',
-                          onClick: () => {
-                            inputActions?.setDraft?.(notice.restoreText!)
-                            inputActions?.persistDraft?.()
-                            setNotice({ kind: 'info', text: copy.restored })
-                          },
-                          style: {
-                            border: '1px solid var(--dsw-alias-border-subtle, rgba(127, 127, 127, 0.3))',
-                            borderRadius: '6px',
-                            background: 'transparent',
-                            color: 'var(--dsw-alias-text-primary, inherit)',
-                            cursor: 'pointer',
-                            fontSize: '11px',
-                            padding: '2px 8px',
-                          },
-                        }, copy.restore)
-                      : null,
                     h('button', {
                       type: 'button',
                       onClick: () => setNotice(null),
@@ -946,6 +982,8 @@ if (typeof window !== 'undefined' && window.__ModuleLoader__) {
             const sessionId = resolveSessionId(props)
             const trackerState = useSessionTracker(sessionId)
             const { snapshot, fetchedAt, cancelling } = trackerState
+            const pendingRestore = usePendingRestore(sessionId)
+            const inputActions = props.inputActions
             const [nowMs, setNowMs] = useState(() => Date.now())
             const copy = useLocaleCopy()
 
@@ -956,38 +994,64 @@ if (typeof window !== 'undefined' && window.__ModuleLoader__) {
               return () => clearInterval(timer)
             }, [snapshot?.status, snapshot?.runId])
 
-            if (!snapshot || snapshot.status !== 'running') return null
+            if (snapshot && snapshot.status === 'running') {
+              const liveElapsedMs = snapshot.elapsedMs + Math.max(0, nowMs - fetchedAt)
+              return h('button', {
+                type: 'button',
+                disabled: cancelling,
+                onClick: () => { if (sessionId) void cancelRun(sessionId) },
+                title: `${copy.badge} · ${copy.stages[snapshot.stage]} (${copy.cancel})`,
+                'data-dsh-better-pill': 'running',
+                style: {
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  padding: '2px 8px',
+                  borderRadius: '999px',
+                  border: '1px solid var(--dsw-alias-accent-primary, rgba(59, 130, 246, 0.45))',
+                  backgroundColor: 'var(--dsw-alias-surface-secondary, rgba(59, 130, 246, 0.1))',
+                  color: 'var(--dsw-alias-text-primary, inherit)',
+                  fontSize: '11px',
+                  lineHeight: '1.4',
+                  cursor: cancelling ? 'default' : 'pointer',
+                },
+              },
+                createSpinnerSvg(React, 10, 'var(--dsw-alias-accent-primary, #3b82f6)'),
+                h('span', { style: { fontWeight: 600 } }, copy.stages[snapshot.stage]),
+                h('span', {
+                  style: {
+                    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+                    color: 'var(--dsw-alias-text-secondary, inherit)',
+                  },
+                }, formatElapsedClock(liveElapsedMs)),
+              )
+            }
 
-            const liveElapsedMs = snapshot.elapsedMs + Math.max(0, nowMs - fetchedAt)
+            // The run is done: the timer's place becomes the way back to the original draft.
+            if (pendingRestore === undefined || !sessionId) return null
             return h('button', {
               type: 'button',
-              disabled: cancelling,
-              onClick: () => { if (sessionId) void cancelRun(sessionId) },
-              title: `${copy.badge} · ${copy.stages[snapshot.stage]} (${copy.cancel})`,
-              'data-dsh-better-pill': 'running',
+              title: copy.restore,
+              'data-dsh-better-pill': 'restore',
+              onClick: () => {
+                inputActions?.setDraft?.(pendingRestore)
+                inputActions?.persistDraft?.()
+                clearPendingRestore(sessionId)
+                noticeSinks.get(sessionId)?.({ kind: 'info', text: copy.restored })
+              },
               style: {
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '5px',
                 padding: '2px 8px',
                 borderRadius: '999px',
-                border: '1px solid var(--dsw-alias-accent-primary, rgba(59, 130, 246, 0.45))',
-                backgroundColor: 'var(--dsw-alias-surface-secondary, rgba(59, 130, 246, 0.1))',
-                color: 'var(--dsw-alias-text-primary, inherit)',
+                border: '1px solid var(--dsw-alias-border-subtle, rgba(127, 127, 127, 0.32))',
+                backgroundColor: 'var(--dsw-alias-surface-primary, transparent)',
+                color: 'var(--dsw-alias-text-secondary, inherit)',
                 fontSize: '11px',
                 lineHeight: '1.4',
-                cursor: cancelling ? 'default' : 'pointer',
+                cursor: 'pointer',
               },
-            },
-              createSpinnerSvg(React, 10, 'var(--dsw-alias-accent-primary, #3b82f6)'),
-              h('span', { style: { fontWeight: 600 } }, copy.stages[snapshot.stage]),
-              h('span', {
-                style: {
-                  fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
-                  color: 'var(--dsw-alias-text-secondary, inherit)',
-                },
-              }, formatElapsedClock(liveElapsedMs)),
-            )
+            }, copy.restore)
           }
 
           const settingsStore = createBetterSettingsStore(ctx, () => getClientCopy(ctx.locale))

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Restore original now takes the timer's place in the tool row**: when a run completes, the `conversation.input.left` pill that showed `Stage · 0:31` turns into the **Restore original** control in place, instead of a button on the banner above the composer. The banner keeps the "deepened prompt is in your draft" message and its dismiss control; the restore target expires after two minutes or as soon as a new run starts, and restoring reports back through the banner.
+
 ## [0.1.0] - 2026-11-13
 
 ### Added

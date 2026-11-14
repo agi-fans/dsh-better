@@ -378,11 +378,23 @@ test('client plugin fixes useInput selector & /api/dsh-better/* RPC, renders doc
     assert.ok(persisted >= 2)
     assert.ok(rpcCalls.some(c => c.endpoint === 'dsh-better/ack' && c.payload.runId === 'run-2'))
 
-    // Click "Restore original" button on the confirmation notice
-    const restoreBtn = findNodes(doneTree, n => n.type === 'button' && n.children?.includes('Restore original'))[0]
-    assert.ok(restoreBtn, 'Should render Restore original button after deepening')
+    // The restore control now lives in the tool row, where the running timer was
+    const doneNotice = findNodes(doneTree, n => n.type === 'button' && n.children?.includes('Dismiss'))[0]
+    assert.ok(doneNotice, 'Still offers the dismiss control on the confirmation notice')
+    assert.equal(
+      findNodes(doneTree, n => n.type === 'button' && n.children?.includes('Restore original')).length,
+      0,
+      'Restore is no longer a notice button',
+    )
+
+    const donePill = fakeReact.render('pill', PillComponent, baseProps('plain', 'existing tail'))
+    const restoreBtn = findNodes(donePill, n => n.type === 'button' && n.children?.includes('Restore original'))[0]
+    assert.ok(restoreBtn, 'Should render the Restore original pill in the tool row after deepening')
+    assert.equal(restoreBtn.props?.['data-dsh-better-pill'], 'restore')
     restoreBtn.props.onClick()
     assert.equal(draftsSet.at(-1), 'original rough prompt\n\nexisting tail')
+    const afterRestore = fakeReact.render('pill', PillComponent, baseProps('plain', 'existing tail'))
+    assert.equal(findNodes(afterRestore, n => n.type === 'button' && n.children?.includes('Restore original')).length, 0)
   } finally {
     fakeReact.unmountAll()
     for (const d of ctxDisposers) d()

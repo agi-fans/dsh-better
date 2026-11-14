@@ -1140,6 +1140,47 @@ ${existingDraft}`;
             }
             const trackers = new Map;
             let disposed = false;
+            const pendingRestores = new Map;
+            const restoreListeners = new Set;
+            const noticeSinks = new Map;
+            function notifyRestore() {
+              for (const listener of restoreListeners) {
+                try {
+                  listener();
+                } catch {}
+              }
+            }
+            function clearPendingRestore(sessionId) {
+              const pending = pendingRestores.get(sessionId);
+              if (!pending)
+                return;
+              clearTimeout(pending.timer);
+              pendingRestores.delete(sessionId);
+              notifyRestore();
+            }
+            function setPendingRestore(sessionId, text) {
+              clearPendingRestore(sessionId);
+              const timer = setTimeout(() => {
+                clearPendingRestore(sessionId);
+              }, 120000);
+              pendingRestores.set(sessionId, { text, timer });
+              notifyRestore();
+            }
+            function usePendingRestore(sessionId) {
+              const [, setVersion] = useState(0);
+              useEffect(() => {
+                if (!sessionId)
+                  return;
+                const listener = () => setVersion((v) => v + 1);
+                restoreListeners.add(listener);
+                return () => {
+                  restoreListeners.delete(listener);
+                };
+              }, [sessionId]);
+              if (!sessionId)
+                return;
+              return pendingRestores.get(sessionId)?.text;
+            }
             const getOrCreateEntry = (sessionId) => {
               let entry = trackers.get(sessionId);
               if (!entry) {
@@ -1304,6 +1345,7 @@ ${existingDraft}`;
                   return;
                 if (name === "better" && result?.kind === "success") {
                   const entry = getOrCreateEntry(execSessionId);
+                  clearPendingRestore(execSessionId);
                   const now = Date.now();
                   const capturedDraft = entry.lastSubmittedDraft;
                   entry.lastSubmittedDraft = "";
@@ -1403,12 +1445,20 @@ ${existingDraft}`;
                 return () => clearInterval(timer);
               }, [snapshot?.status, snapshot?.runId]);
               useEffect(() => {
+                if (!sessionId)
+                  return;
+                noticeSinks.set(sessionId, setNotice);
+                return () => {
+                  if (noticeSinks.get(sessionId) === setNotice)
+                    noticeSinks.delete(sessionId);
+                };
+              }, [sessionId]);
+              useEffect(() => {
                 if (!notice)
                   return;
-                const timeoutMs = notice.restoreText ? 8000 : 4000;
                 const timer = setTimeout(() => {
                   setNotice(null);
-                }, timeoutMs);
+                }, 4000);
                 return () => clearTimeout(timer);
               }, [notice]);
               useEffect(() => {
@@ -1424,8 +1474,10 @@ ${existingDraft}`;
                   const merged = insertIntoDraft(snapshot.improvedPrompt, existingDraft);
                   inputActions?.setDraft?.(merged);
                   inputActions?.persistDraft?.();
-                  const restoreText = snapshot.sourceDraft ? insertIntoDraft(snapshot.sourceDraft, existingDraft) : undefined;
-                  setNotice({ kind: "success", text: copy.done, restoreText });
+                  if (snapshot.sourceDraft) {
+                    setPendingRestore(sessionId, insertIntoDraft(snapshot.sourceDraft, existingDraft));
+                  }
+                  setNotice({ kind: "success", text: copy.done });
                   ackRun(sessionId, snapshot.runId);
                   return;
                 }
@@ -1514,23 +1566,7 @@ ${existingDraft}`;
                     flexShrink: 0,
                     backgroundColor: notice.kind === "success" ? "var(--dsw-alias-status-success, #22c55e)" : "var(--dsw-alias-text-secondary, #888)"
                   }
-                }), h("span", null, notice.text)), h("div", { style: { display: "flex", alignItems: "center", gap: "6px", flexShrink: 0 } }, notice.restoreText ? h("button", {
-                  type: "button",
-                  onClick: () => {
-                    inputActions?.setDraft?.(notice.restoreText);
-                    inputActions?.persistDraft?.();
-                    setNotice({ kind: "info", text: copy.restored });
-                  },
-                  style: {
-                    border: "1px solid var(--dsw-alias-border-subtle, rgba(127, 127, 127, 0.3))",
-                    borderRadius: "6px",
-                    background: "transparent",
-                    color: "var(--dsw-alias-text-primary, inherit)",
-                    cursor: "pointer",
-                    fontSize: "11px",
-                    padding: "2px 8px"
-                  }
-                }, copy.restore) : null, h("button", {
+                }), h("span", null, notice.text)), h("div", { style: { display: "flex", alignItems: "center", gap: "6px", flexShrink: 0 } }, h("button", {
                   type: "button",
                   onClick: () => setNotice(null),
                   style: {
@@ -1780,6 +1816,8 @@ ${existingDraft}`;
               const sessionId = resolveSessionId(props);
               const trackerState = useSessionTracker(sessionId);
               const { snapshot, fetchedAt, cancelling } = trackerState;
+              const pendingRestore = usePendingRestore(sessionId);
+              const inputActions = props.inputActions;
               const [nowMs, setNowMs] = useState(() => Date.now());
               const copy = useLocaleCopy();
               useEffect(() => {
@@ -1791,37 +1829,62 @@ ${existingDraft}`;
                 }, 500);
                 return () => clearInterval(timer);
               }, [snapshot?.status, snapshot?.runId]);
-              if (!snapshot || snapshot.status !== "running")
+              if (snapshot && snapshot.status === "running") {
+                const liveElapsedMs = snapshot.elapsedMs + Math.max(0, nowMs - fetchedAt);
+                return h("button", {
+                  type: "button",
+                  disabled: cancelling,
+                  onClick: () => {
+                    if (sessionId)
+                      cancelRun(sessionId);
+                  },
+                  title: `${copy.badge} · ${copy.stages[snapshot.stage]} (${copy.cancel})`,
+                  "data-dsh-better-pill": "running",
+                  style: {
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "5px",
+                    padding: "2px 8px",
+                    borderRadius: "999px",
+                    border: "1px solid var(--dsw-alias-accent-primary, rgba(59, 130, 246, 0.45))",
+                    backgroundColor: "var(--dsw-alias-surface-secondary, rgba(59, 130, 246, 0.1))",
+                    color: "var(--dsw-alias-text-primary, inherit)",
+                    fontSize: "11px",
+                    lineHeight: "1.4",
+                    cursor: cancelling ? "default" : "pointer"
+                  }
+                }, createSpinnerSvg(React, 10, "var(--dsw-alias-accent-primary, #3b82f6)"), h("span", { style: { fontWeight: 600 } }, copy.stages[snapshot.stage]), h("span", {
+                  style: {
+                    fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                    color: "var(--dsw-alias-text-secondary, inherit)"
+                  }
+                }, formatElapsedClock(liveElapsedMs)));
+              }
+              if (pendingRestore === undefined || !sessionId)
                 return null;
-              const liveElapsedMs = snapshot.elapsedMs + Math.max(0, nowMs - fetchedAt);
               return h("button", {
                 type: "button",
-                disabled: cancelling,
+                title: copy.restore,
+                "data-dsh-better-pill": "restore",
                 onClick: () => {
-                  if (sessionId)
-                    cancelRun(sessionId);
+                  inputActions?.setDraft?.(pendingRestore);
+                  inputActions?.persistDraft?.();
+                  clearPendingRestore(sessionId);
+                  noticeSinks.get(sessionId)?.({ kind: "info", text: copy.restored });
                 },
-                title: `${copy.badge} · ${copy.stages[snapshot.stage]} (${copy.cancel})`,
-                "data-dsh-better-pill": "running",
                 style: {
                   display: "inline-flex",
                   alignItems: "center",
-                  gap: "5px",
                   padding: "2px 8px",
                   borderRadius: "999px",
-                  border: "1px solid var(--dsw-alias-accent-primary, rgba(59, 130, 246, 0.45))",
-                  backgroundColor: "var(--dsw-alias-surface-secondary, rgba(59, 130, 246, 0.1))",
-                  color: "var(--dsw-alias-text-primary, inherit)",
+                  border: "1px solid var(--dsw-alias-border-subtle, rgba(127, 127, 127, 0.32))",
+                  backgroundColor: "var(--dsw-alias-surface-primary, transparent)",
+                  color: "var(--dsw-alias-text-secondary, inherit)",
                   fontSize: "11px",
                   lineHeight: "1.4",
-                  cursor: cancelling ? "default" : "pointer"
+                  cursor: "pointer"
                 }
-              }, createSpinnerSvg(React, 10, "var(--dsw-alias-accent-primary, #3b82f6)"), h("span", { style: { fontWeight: 600 } }, copy.stages[snapshot.stage]), h("span", {
-                style: {
-                  fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
-                  color: "var(--dsw-alias-text-secondary, inherit)"
-                }
-              }, formatElapsedClock(liveElapsedMs)));
+              }, copy.restore);
             }
             const settingsStore = createBetterSettingsStore(ctx, () => getClientCopy(ctx.locale));
             const BetterSettingsPanel = createBetterSettingsPanel(React, settingsStore, () => getClientCopy(ctx.locale), subscribeLocaleChange);
