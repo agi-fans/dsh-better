@@ -41,9 +41,10 @@ jobs:
           PKG_VERSION="$(node -p "require('./package.json').version")"
           test "$TAG_VERSION" = "$PKG_VERSION"
 
+      # npm trusted publishing (OIDC): no long-lived token. The package's Trusted Publisher
+      # entry names this repo and workflow, and the job's id-token is exchanged for a
+      # short-lived one at publish time. npm CLI >= 11.5 is required for the handshake.
       - name: Publish to npm
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           PKG_NAME="$(node -p "require('./package.json').name")"
           PKG_VERSION="$(node -p "require('./package.json').version")"
@@ -52,9 +53,5 @@ jobs:
             echo "${PKG_NAME}@${PKG_VERSION} is already published on npm — skipping publish."
             exit 0
           fi
-          if [ -n "${NPM_TOKEN:-}" ]; then
-            NODE_AUTH_TOKEN="$NPM_TOKEN" npm publish --provenance --access public
-          else
-            npm install -g npm@latest
-            npm publish --provenance --access public
-          fi
+          npm install -g npm@latest
+          npm publish --provenance --access public
