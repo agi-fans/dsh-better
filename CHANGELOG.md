@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-11-19
+
 ### Changed
 
 - Prompt and brief helpers share the completed parent history when the Harness uses SQLite fork storage.
@@ -44,7 +46,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **KV prompt cache preservation**: Rely on `tools.guard()` + `sandbox/mode: 'read-only'` + `approval/policy: 'never'` without `tools.restrict({ deny })`, keeping `tools.schemas()` byte-identical to the parent session so DeepSeek's `addition-only` tool baseline never rebuilds.
 - **PTC `run_code` support & metadata caching**: Added read-only `run_code` batching (with live `tool/ptc-dispatch-start` / `tool/ptc-dispatch` badge tracking), concurrent `workingDirectory.ensure` + `llm.resolveModelInfo` startup, a 5-minute `resolveModelInfo` TTL cache, tighter `0–2` tool-batch / zero-preamble instructions in `prompts/helper.md` and `prompts/brief.md`, and 160ms active UI polling.
 
-[Unreleased]: https://github.com/agi-fans/dsh-better/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/agi-fans/dsh-better/compare/v0.1.3...HEAD
+[0.1.3]: https://github.com/agi-fans/dsh-better/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/agi-fans/dsh-better/releases/tag/v0.1.2
 [0.1.1]: https://github.com/agi-fans/dsh-better/releases/tag/v0.1.1
 [0.1.0]: https://github.com/agi-fans/dsh-better/releases/tag/v0.1.0
