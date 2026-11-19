@@ -18,7 +18,6 @@ export const HELPER_READ_ONLY_TOOLS = new Set<string>([
   'grep',
   'glob',
   'lsp',
-  'working_directory',
   'run_code',
   'web_search',
   'web_fetch',
@@ -197,7 +196,7 @@ export function computeDepthStage(input: ProgressSnapshotInput): DepthStage {
  */
 export function helperToolGuard(toolName: string): string | undefined {
   if (HELPER_READ_ONLY_TOOLS.has(toolName)) return undefined
-  return `Tool "${toolName}" is disabled inside the read-only /better helper. Use read, grep, glob, lsp, working_directory, or read-only inspection tools only.`
+  return `Tool "${toolName}" is disabled inside the read-only /better helper. Use read, grep, glob, lsp, or read-only inspection tools only.`
 }
 
 export interface ModelOverride {

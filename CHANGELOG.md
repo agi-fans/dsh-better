@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Prompt and brief helpers share the completed parent history when the Harness uses SQLite fork storage.
+- Helpers read the current directory from session context and block the legacy directory-changing tool.
+
 ## [0.1.2] - 2026-11-14
 
 ### Changed

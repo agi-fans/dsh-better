@@ -57,10 +57,10 @@ test('toolLabel formats DSH read-only tools concisely', () => {
 })
 
 test('helperToolGuard allows read-only tools including run_code and denies mutating/shell/cua/subagent tools', () => {
-  for (const allowed of ['read', 'read_image', 'grep', 'glob', 'lsp', 'working_directory', 'run_code', 'web_search', 'web_fetch', 'read_mcp_resource']) {
+  for (const allowed of ['read', 'read_image', 'grep', 'glob', 'lsp', 'run_code', 'web_search', 'web_fetch', 'read_mcp_resource']) {
     assert.equal(helperToolGuard(allowed), undefined, `${allowed} should be allowed`)
   }
-  for (const denied of ['edit', 'write', 'apply_patch', 'str_replace_editor', 'bash', 'pwsh', 'cua_run_code', 'subagent', 'subagent_fork', 'present', 'ask_user_question', 'unknown_mutator']) {
+  for (const denied of ['edit', 'write', 'apply_patch', 'str_replace_editor', 'working_directory', 'bash', 'pwsh', 'cua_run_code', 'subagent', 'subagent_fork', 'present', 'ask_user_question', 'unknown_mutator']) {
     const reason = helperToolGuard(denied)
     assert.equal(typeof reason, 'string', `${denied} should be denied`)
     assert.ok(reason!.includes(denied))

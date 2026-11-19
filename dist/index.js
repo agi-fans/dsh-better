@@ -17,7 +17,6 @@ var HELPER_READ_ONLY_TOOLS = new Set([
   "grep",
   "glob",
   "lsp",
-  "working_directory",
   "run_code",
   "web_search",
   "web_fetch",
@@ -172,7 +171,7 @@ function computeDepthStage(input) {
 function helperToolGuard(toolName) {
   if (HELPER_READ_ONLY_TOOLS.has(toolName))
     return;
-  return `Tool "${toolName}" is disabled inside the read-only /better helper. Use read, grep, glob, lsp, working_directory, or read-only inspection tools only.`;
+  return `Tool "${toolName}" is disabled inside the read-only /better helper. Use read, grep, glob, lsp, or read-only inspection tools only.`;
 }
 var INHERIT_SENTINELS = new Set(["inherit", "default", "auto"]);
 function isInheritSentinel(value) {
@@ -438,6 +437,8 @@ async function runForkedHelper(params) {
     return { status: "cancelled" };
   }
   const seed = completedTurnPrefix(params.parentAgent);
+  const inheritedEventCount = seed.length;
+  const parentSessionId = params.parentAgent.session.id;
   const route = resolveRoute(params.parentAgent, params.modelSpec, params.reasoningEffort);
   const ensureCwdPromise = typeof params.workingDirectory?.ensure === "function" ? params.workingDirectory.ensure(params.parentAgent, params.signal).catch(() => {
     return;
@@ -503,13 +504,17 @@ async function runForkedHelper(params) {
       sessionId: randomUUID(),
       meta: {
         origin: "subagent",
-        parentSession: params.parentAgent.session.id,
-        isSeeded: seed.length > 0,
+        parentSession: parentSessionId,
+        isSeeded: inheritedEventCount > 0,
         delegationDepth: childDepth,
         ...cwd !== undefined ? { cwd } : {},
         ...typeof parentPreset === "string" ? { agentPreset: parentPreset } : {}
       },
-      ...seed.length > 0 ? { seed, inheritedEventCount: seed.length } : { inheritedEventCount: 0 },
+      inheritedEventCount,
+      ...inheritedEventCount > 0 ? {
+        seed,
+        parentSource: { sessionId: parentSessionId, endSeq: inheritedEventCount }
+      } : {},
       agentOptions: {
         ...route.provider !== undefined ? { provider: route.provider } : {},
         ...route.model !== undefined ? { model: route.model } : {},

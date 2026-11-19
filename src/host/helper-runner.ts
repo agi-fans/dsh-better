@@ -300,6 +300,8 @@ export async function runForkedHelper(params: RunHelperParams): Promise<RunHelpe
   }
 
   const seed = completedTurnPrefix(params.parentAgent)
+  const inheritedEventCount = seed.length
+  const parentSessionId = params.parentAgent.session.id
   const route = resolveRoute(params.parentAgent, params.modelSpec, params.reasoningEffort)
 
   const ensureCwdPromise = typeof params.workingDirectory?.ensure === 'function'
@@ -386,13 +388,18 @@ export async function runForkedHelper(params: RunHelperParams): Promise<RunHelpe
       sessionId: randomUUID(),
       meta: {
         origin: 'subagent',
-        parentSession: params.parentAgent.session.id,
-        isSeeded: seed.length > 0,
+        parentSession: parentSessionId,
+        isSeeded: inheritedEventCount > 0,
         delegationDepth: childDepth,
         ...(cwd !== undefined ? { cwd } : {}),
         ...(typeof parentPreset === 'string' ? { agentPreset: parentPreset } : {}),
       },
-      ...(seed.length > 0 ? { seed, inheritedEventCount: seed.length } : { inheritedEventCount: 0 }),
+      inheritedEventCount,
+      // Older runtimes ignore parentSource and replay the complete seed.
+      ...(inheritedEventCount > 0 ? {
+        seed,
+        parentSource: { sessionId: parentSessionId, endSeq: inheritedEventCount },
+      } : {}),
       agentOptions: {
         ...(route.provider !== undefined ? { provider: route.provider } : {}),
         ...(route.model !== undefined ? { model: route.model } : {}),

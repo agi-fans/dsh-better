@@ -307,13 +307,12 @@ function createMockContext(options: {
   }
 }
 
-function makeParentAgent(sessionId = 'sess-1') {
-  const parentEvents = [
+function makeParentAgent(sessionId = 'sess-1', parentEvents = [
     { seq: 0, type: 'user/message', data: { content: [{ type: 'text', text: 'prev' }] } },
     { seq: 1, type: 'turn/end', data: { reason: { kind: 'completed' } } },
     // Unbalanced in-flight turn after last turn/end must NOT be copied into helper fork seed:
     { seq: 2, type: 'tool/call', data: { callId: 'c1', name: 'read' } },
-  ]
+  ]) {
   return {
     id: sessionId,
     options: { provider: 'deepseek-official', model: 'deepseek-chat', approval: 'auto' },
@@ -341,14 +340,18 @@ test('headless /better forks completed turn prefix, enforces read-only guard, an
   })
 
   const betterCmd = harness.commands.get('better')!
-  const result = await betterCmd.handler({ agent: makeParentAgent(), rawInput: 'fix app', signal: new AbortController().signal })
+  const parent = makeParentAgent()
+  const result = await betterCmd.handler({ agent: parent, rawInput: 'fix app', signal: new AbortController().signal })
 
   assert.deepEqual(result, { kind: 'success', text: 'Update src/app.ts' })
   assert.equal(harness.createdAgents.length, 1)
 
   const spawned = harness.createdAgents[0]!
   assert.equal(spawned.disposed, true)
-  assert.equal(spawned.options.seed.length, 2, 'fork seed must truncate after last turn/end')
+  assert.deepEqual(spawned.options.seed, parent.session.snapshotEvents().slice(0, 2))
+  assert.equal(spawned.options.inheritedEventCount, 2)
+  assert.deepEqual(spawned.options.parentSource, { sessionId: parent.session.id, endSeq: 2 })
+  assert.equal(spawned.options.meta.isSeeded, true)
   assert.equal(spawned.options.meta.origin, 'subagent')
   assert.equal(spawned.options.meta.cwd, '/repo/demo')
   assert.deepEqual(spawned.options.agentOptions, {
@@ -371,13 +374,19 @@ test('headless /better saves fallback file when tags are missing', async () => {
     endTurn({ kind: 'completed' })
   })
 
-  const result = await harness.commands.get('better')!.handler({ agent: makeParentAgent(), rawInput: 'improve me' })
+  const parent = makeParentAgent('sess-empty', [])
+  const result = await harness.commands.get('better')!.handler({ agent: parent, rawInput: 'improve me' })
   assert.equal(result.kind, 'error')
   assert.match(result.text, /Raw reply saved to: (.+\.md)/)
   const match = /Raw reply saved to: (.+\.md)/.exec(result.text)
   const fallbackPath = match?.[1]
   assert.ok(fallbackPath && existsSync(fallbackPath))
   rmSync(path.dirname(fallbackPath), { recursive: true, force: true })
+  const spawned = harness.createdAgents[0]!
+  assert.equal(spawned.options.meta.isSeeded, false)
+  assert.equal(spawned.options.inheritedEventCount, 0)
+  assert.equal(Object.hasOwn(spawned.options, 'parentSource'), false)
+  assert.equal(Object.hasOwn(spawned.options, 'seed'), false)
   harness.dispose()
 })
 
@@ -490,6 +499,7 @@ test('subagent /better brief checking rewrites marked briefs and fails closed on
     signal: new AbortController().signal,
   })
   assert.equal(harness.createdAgents.length, 1)
+  assert.deepEqual(harness.createdAgents[0]!.options.parentSource, { sessionId: parent.session.id, endSeq: 2 })
   assert.deepEqual(harness.subagentStartCalls[1].prompt, [
     { type: 'text', text: 'Checked brief referencing src/core/better.ts' },
     { type: 'image', mediaType: 'image/png', data: 'abc' },

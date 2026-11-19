@@ -3,7 +3,8 @@ You are helping the user turn their rough draft into the prompt they would write
 ## Tools Available
 
 Only read-only inspection is available — write/edit tools, shell execution, and subagent delegation are blocked:
-- `read`, `read_image`, `grep`, `glob`, `lsp`, `working_directory`, read-only PTC `run_code` (when loaded), and read-only MCP/resource/web inspection tools (when loaded).
+- `read`, `read_image`, `grep`, `glob`, `lsp`, read-only PTC `run_code` (when loaded), and read-only MCP/resource/web inspection tools (when loaded).
+- Use the `Current working directory:` line in the session context to resolve relative paths.
 - Edits (`edit`, `write`, `apply_patch`, `str_replace_editor`), shell commands (`bash`, `pwsh`, `terminal_*`), desktop/browser control (`cua_run_code`), and subagents are denied by policy.
 
 ## Speed & Inspection Budget
